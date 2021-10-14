@@ -21,21 +21,20 @@ public class MatrixUtil {
     public static int[][] singleThreadMultiply(int[][] matrixA, int[][] matrixB) {
         final int matrixSize = matrixA.length;
         final int[][] matrixC = new int[matrixSize][matrixSize];
+        int[] curColumn = new int[matrixSize];
 
-        int[][] matrixBT = new int[matrixSize][matrixSize];
-        for (int i = 0; i < matrixSize; i++) {
-            for (int j = 0; j < matrixSize; j++) {
-                matrixBT[j][i] = matrixB[i][j];
+        for (int j = 0; j < matrixSize; j++) {
+            for (int k = 0; k < matrixSize; k++) {
+                curColumn[k] = matrixB[k][j];
             }
-        }
-        
-        for (int i = 0; i < matrixSize; i++) {
-            for (int j = 0; j < matrixSize; j++) {
+
+            for (int i = 0; i < matrixSize; i++) {
+                int[] curRow = matrixA[i];
                 int sum = 0;
                 for (int k = 0; k < matrixSize; k++) {
-                    sum += matrixA[i][k] * matrixBT[j][k];
+                    sum += curRow[k] * curColumn[k];
                 }
-                matrixC[i][j] = sum;
+                matrixC[j][i] = sum;
             }
         }
         return matrixC;
