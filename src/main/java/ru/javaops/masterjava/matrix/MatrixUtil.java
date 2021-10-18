@@ -1,8 +1,9 @@
 package ru.javaops.masterjava.matrix;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.*;
 
 /**
  * gkislin
@@ -10,11 +11,41 @@ import java.util.concurrent.ExecutorService;
  */
 public class MatrixUtil {
 
-    // TODO implement parallel multiplication matrixA*matrixB
-    public static int[][] concurrentMultiply(int[][] matrixA, int[][] matrixB, ExecutorService executor) throws InterruptedException, ExecutionException {
+    public static int[][] concurrentMultiply(int[][] matrixA, int[][] matrixB, ExecutorService executor) {
+        final CompletionService<Integer> completionService = new ExecutorCompletionService<>(executor);
         final int matrixSize = matrixA.length;
         final int[][] matrixC = new int[matrixSize][matrixSize];
+        List<Future<Integer>> futures = new ArrayList<>(matrixSize);
 
+        for (int j = 0; j < matrixSize; j++) {
+            int[] curColumn = new int[matrixSize];
+            int columnIndex = j;
+
+            Future<Integer> future = completionService.submit(() -> {
+                for (int k = 0; k < matrixSize; k++) {
+                    curColumn[k] = matrixB[k][columnIndex];
+                }
+
+                for (int i = 0; i < matrixSize; i++) {
+                    int[] curRow = matrixA[i];
+                    int sum = 0;
+                    for (int k = 0; k < matrixSize; k++) {
+                        sum += curRow[k] * curColumn[k];
+                    }
+                    matrixC[columnIndex][i] = sum;
+                }
+                return columnIndex;
+            });
+
+            futures.add(future);
+        }
+
+        while(!futures.isEmpty()) {
+            Future<Integer> completeFuture = completionService.poll();
+            if (completeFuture != null) {
+                futures.remove(completeFuture);
+            }
+        }
         return matrixC;
     }
 
