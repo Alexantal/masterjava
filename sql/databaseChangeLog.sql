@@ -32,3 +32,13 @@ CREATE TABLE user_group (
   group_id INTEGER NOT NULL REFERENCES groups (id),
   CONSTRAINT users_group_idx UNIQUE (user_id, group_id)
 );
+
+--changeset avmelnikov:3
+CREATE TABLE email_sending_results (
+    id                  INTEGER PRIMARY KEY DEFAULT nextval('common_seq'),
+    date_time           TIMESTAMP NOT NULL,
+    from_email          TEXT NOT NULL,
+    email_subject       TEXT NOT NULL DEFAULT 'without subject',
+    is_sending_success  BOOLEAN NOT NULL DEFAULT FALSE,
+    CONSTRAINT date_time_from_email_idx UNIQUE (date_time, from_email)
+)
