@@ -31,9 +31,13 @@ public class MailWSClient {
         return status;
     }
 
-    public static GroupResult sendBulk(final Set<Addressee> to, final String subject, final String body) throws WebStateException {
-        log.info("Send bulk to '" + to + "' subject '" + subject + (log.isDebugEnabled() ? "\nbody=" + body : ""));
-        GroupResult result = WS_CLIENT.getPort().sendBulk(to, subject, body);
+    public static GroupResult sendBulk(final Set<Addressee> to, final String subject, final String body, final String attachment) throws WebStateException {
+        if (attachment == null) {
+            log.info("Send bulk to '" + to + "' subject '" + subject + (log.isDebugEnabled() ? "\nbody=" + body : ""));
+        } else {
+            log.info("Send bulk to '" + to + "' subject '" + subject + (log.isDebugEnabled() ? "\nbody=" + body : "") + "\n'attachment='");
+        }
+        GroupResult result = WS_CLIENT.getPort().sendBulk(to, subject, body, attachment);
         log.info("Sent bulk with result: " + result);
         return result;
     }
