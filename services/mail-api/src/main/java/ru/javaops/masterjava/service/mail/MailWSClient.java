@@ -6,10 +6,11 @@ import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.event.Level;
-import ru.javaops.masterjava.web.AuthUtil;
+import ru.javaops.masterjava.config.Configs;
 import ru.javaops.masterjava.web.WebStateException;
 import ru.javaops.masterjava.web.WsClient;
 import ru.javaops.masterjava.web.handler.SoapLoggingHandlers;
+import ru.javaops.masterjava.web.handler.SoapServerSecurityHandler;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.soap.MTOMFeature;
@@ -18,12 +19,10 @@ import java.util.Set;
 
 @Slf4j
 public class MailWSClient {
-    private static final WsClient<MailService> WS_CLIENT;
-    public static final String USER = "user";
-    public static final String PASSWORD = "password";
-    private static final SoapLoggingHandlers.ClientHandler LOGGING_HANDLER = new SoapLoggingHandlers.ClientHandler(Level.DEBUG);
 
-    public static String AUTH_HEADER = AuthUtil.encodeBasicAuthHeader(USER, PASSWORD);
+    private static final WsClient<MailService> WS_CLIENT;
+    private static final SoapLoggingHandlers.ClientHandler LOGGING_HANDLER = new SoapLoggingHandlers.ClientHandler(Level.DEBUG);
+    private static final SoapServerSecurityHandler SECURITY_HANDLER = new SoapServerSecurityHandler();
 
     static {
         WS_CLIENT = new WsClient<>(Resources.getResource("wsdl/mailService.wsdl"),
@@ -50,8 +49,9 @@ public class MailWSClient {
 
     private static MailService getPort() {
         MailService port = WS_CLIENT.getPort(new MTOMFeature(1024));
-        WsClient.setAuth(port, USER, PASSWORD);
+        WsClient.setAuth(port, SECURITY_HANDLER.getUser(), SECURITY_HANDLER.getPassword());
         WsClient.setHandler(port, LOGGING_HANDLER);
+        WsClient.setHandler(port, SECURITY_HANDLER);
         return port;
     }
 
